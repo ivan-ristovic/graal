@@ -25,6 +25,8 @@ package com.oracle.truffle.espresso.impl;
 import com.oracle.truffle.espresso.classfile.ClassfileParser;
 import com.oracle.truffle.espresso.classfile.ClassfileStream;
 import com.oracle.truffle.espresso.runtime.EspressoContext;
+import org.graalvm.collections.EconomicMap;
+import org.graalvm.collections.EconomicMapWrap;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -47,10 +49,18 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class EspressoLanguageCache {
 
+    public EspressoLanguageCache() {
+        System.err.println("Cache created");
+    }
+
+    // TODO use EconomicMap
+    // TODO concurrency
+    // TODO change key type to byte[]
     private final Map<String, ParserKlass> parserKlasses = new ConcurrentHashMap<>();
     private final Map<LinkedKey, LinkedKlass> linkedKlasses = new ConcurrentHashMap<>();
 
     public ParserKlass getOrCreateParserKlass(String name, byte[] bytes, EspressoContext context) {
+        System.err.println("Consulting parser cache for: " + name);
         ParserKlass parserKlass = parserKlasses.get(name);
         if (parserKlass == null) {
             parserKlass = createParserKlass(name, bytes, context);
@@ -60,6 +70,8 @@ public final class EspressoLanguageCache {
     }
 
     public LinkedKlass getOrCreateLinkedKlass(ParserKlass parserKlass, LinkedKlass superKlass, LinkedKlass[] interfaces) {
+        System.err.println("Consulting linked cache for: " + parserKlass.getName());
+
         LinkedKey key = new LinkedKey(parserKlass, superKlass, interfaces);
         LinkedKlass linkedKlass = linkedKlasses.get(key);
         if (linkedKlass == null) {

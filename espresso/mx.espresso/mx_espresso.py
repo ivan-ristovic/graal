@@ -52,6 +52,15 @@ def _java_truffle_command(args):
     return _espresso_command('java', ['-truffle'] + args)
 
 
+def _espresso_playground_command(args):
+    """[DEV] Espresso standalone command from distribution jars + arguments"""
+    vm_args, args = mx.extract_VM_args(args, useDoubleDash=True, defaultAllVMArgs=False)
+    return (
+        vm_args
+        + mx.get_runtime_jvm_args(['ESPRESSO', 'ESPRESSO_PLAYGROUND_LAUNCHER'], jdk=mx.get_jdk())
+        + [mx.distribution('ESPRESSO_PLAYGROUND_LAUNCHER').mainClass] + args
+    )
+
 def _espresso_standalone_command(args):
     """Espresso standalone command from distribution jars + arguments"""
     vm_args, args = mx.extract_VM_args(args, useDoubleDash=True, defaultAllVMArgs=False)
@@ -66,6 +75,10 @@ def _run_espresso_launcher(args=None, cwd=None, nonZeroIsFatal=True):
     """Run Espresso launcher within a GraalVM"""
     return mx.run(_espresso_launcher_command(args), cwd=cwd, nonZeroIsFatal=nonZeroIsFatal)
 
+
+def _run_espresso_playground(args=None, cwd=None, nonZeroIsFatal=True):
+    """[DEV] Run standalone Espresso (not as part of GraalVM) from distribution jars"""
+    return mx.run_java(_espresso_playground_command(args), cwd=cwd, nonZeroIsFatal=nonZeroIsFatal)
 
 def _run_espresso_standalone(args=None, cwd=None, nonZeroIsFatal=True):
     """Run standalone Espresso (not as part of GraalVM) from distribution jars"""
@@ -239,6 +252,7 @@ mx_sdk_vm.register_graalvm_component(mx_sdk_vm.GraalVmLanguage(
 mx.update_commands(_suite, {
     'espresso': [_run_espresso_launcher, '[args]'],
     'espresso-standalone': [_run_espresso_standalone, '[args]'],
+    'espresso-playground': [_run_espresso_playground, '[args]'],
     'java-truffle': [_run_java_truffle, '[args]'],
     'espresso-meta': [_run_espresso_meta, '[args]'],
 })

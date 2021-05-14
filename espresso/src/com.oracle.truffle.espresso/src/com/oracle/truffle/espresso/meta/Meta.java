@@ -1367,6 +1367,7 @@ public final class Meta implements ContextAccess {
     // endregion Guest exception handling (throw)
 
     private ObjectKlass knownKlass(Symbol<Type> type) {
+        System.err.println("knownKlass: " + type);
         CompilerAsserts.neverPartOfCompilation();
         assert !Types.isArray(type);
         assert !Types.isPrimitive(type);

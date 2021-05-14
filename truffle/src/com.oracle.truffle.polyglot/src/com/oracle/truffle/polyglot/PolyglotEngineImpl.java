@@ -1760,6 +1760,9 @@ final class PolyglotEngineImpl extends AbstractPolyglotImpl.AbstractEngineImpl i
             boolean patchResult = false;
             try {
                 patchResult = context.patch(config);
+            } catch (Exception e){
+                e.printStackTrace();
+                throw e;
             } finally {
                 if (patchResult) {
                     Collection<PolyglotInstrument> toCreate = null;

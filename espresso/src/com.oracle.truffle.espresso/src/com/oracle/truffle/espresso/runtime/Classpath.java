@@ -250,13 +250,20 @@ public final class Classpath {
 
         @Override
         public ZipFile zipFile() {
-            if (zipFile == null && file != null) {
-                try {
-                    zipFile = new ZipFile(file);
-                } catch (IOException e) {
-                }
+            try {
+                zipFile = new ZipFile(file);
+            } catch (IOException e) {
+
             }
             return zipFile;
+
+//            if (zipFile == null && file != null) {
+//                try {
+//                    zipFile = new ZipFile(file);
+//                } catch (IOException e) {
+//                }
+//            }
+//            return zipFile;
         }
 
         @Override

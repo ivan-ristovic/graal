@@ -2050,26 +2050,41 @@ public final class JniEnv extends NativeEnv {
         String methodSignature = NativeUtils.interopPointerToString(methodSignaturePtr);
         assert methodName != null && methodSignature != null;
 
+        System.err.println("registerNative " + methodName);
+
         Symbol<Name> name = getNames().lookup(methodName);
         Symbol<Signature> signature = getSignatures().lookupValidSignature(methodSignature);
 
+        System.err.println("signatures finished " + methodName);
+
         Meta meta = getMeta();
         if (name == null || signature == null) {
+            System.err.println("fail " + methodName);
             setPendingException(Meta.initException(meta.java_lang_NoSuchMethodError));
             return JNI_ERR;
         }
 
+        System.err.println("looking up declared method... " + methodName);
+        System.err.println("clazz:  " + clazz);
+        Klass mirrorKlass = clazz.getMirrorKlass();
+        System.err.println("looking up declared method for " + clazz + " " + mirrorKlass);
         Method targetMethod = clazz.getMirrorKlass().lookupDeclaredMethod(name, signature);
+        System.err.println("found target method " + targetMethod);
         if (targetMethod != null && targetMethod.isNative()) {
+            System.err.println("unregistering native " + targetMethod);
             targetMethod.unregisterNative();
+            System.err.println("removing substitution " + targetMethod);
             getSubstitutions().removeRuntimeSubstitution(targetMethod);
         } else {
             setPendingException(Meta.initException(meta.java_lang_NoSuchMethodError));
             return JNI_ERR;
         }
 
+        System.err.println("building native sig " + methodName);
         NativeSignature ns = Method.buildJniNativeSignature(targetMethod.getParsedSignature());
+        System.err.println("bindSymbol " + methodName);
         final TruffleObject boundNative = getNativeAccess().bindSymbol(closure, ns);
+        System.err.println("bindSymbol success " + methodName);
         Substitutions.EspressoRootNodeFactory factory = new Substitutions.EspressoRootNodeFactory() {
             @Override
             public EspressoRootNode createNodeIfValid(Method methodToSubstitute, boolean forceValid) {

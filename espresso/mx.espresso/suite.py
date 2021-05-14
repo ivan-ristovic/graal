@@ -108,6 +108,19 @@ suite = {
             "checkstyle": "com.oracle.truffle.espresso.processor",
         },
 
+        "com.oracle.truffle.espresso.playground": {
+            "subDir": "src",
+            "sourceDirs": ["src"],
+            "dependencies": [
+                "sdk:GRAAL_SDK",
+                "sdk:LAUNCHER_COMMON",
+                "espresso:ESPRESSO",
+                "espresso:POLYGLOT"
+            ],
+            "javaCompliance": "1.8+",
+            "checkstyle": "com.oracle.truffle.espresso",
+        },
+
         "com.oracle.truffle.espresso.launcher": {
             "subDir": "src",
             "sourceDirs": ["src"],
@@ -260,6 +273,22 @@ suite = {
                 "org.graalvm.language.java.home": "<path:ESPRESSO_SUPPORT>",
                 "polyglot.java.JVMLibraryPath": "<path:ESPRESSO_JVM_SUPPORT>/truffle",
             },
+        },
+
+        "ESPRESSO_PLAYGROUND_LAUNCHER": {
+            "subDir": "src",
+            "dependencies": [
+                "com.oracle.truffle.espresso.playground",
+            ],
+            "mainClass": "com.oracle.truffle.espresso.playground.EspressoPlaygroundLauncher",
+            "distDependencies": [
+                "sdk:GRAAL_SDK",
+                "sdk:LAUNCHER_COMMON",
+                "espresso:ESPRESSO",
+                "espresso:POLYGLOT"
+            ],
+            "description": "Espresso launcher using the polyglot API.",
+            "allowsJavadocWarnings": True,
         },
 
         "ESPRESSO_LAUNCHER": {

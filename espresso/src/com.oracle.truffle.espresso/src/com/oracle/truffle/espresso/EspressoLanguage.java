@@ -25,6 +25,7 @@ package com.oracle.truffle.espresso;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
+import com.oracle.truffle.api.TruffleLogger;
 import com.oracle.truffle.espresso.impl.EspressoLanguageCache;
 import com.oracle.truffle.espresso.nodes.interop.GetBindingsNode;
 import org.graalvm.home.Version;
@@ -51,6 +52,7 @@ import com.oracle.truffle.espresso.nodes.interop.ExitCodeNode;
 import com.oracle.truffle.espresso.runtime.EspressoContext;
 import com.oracle.truffle.espresso.runtime.EspressoExitException;
 import com.oracle.truffle.espresso.substitutions.Substitutions;
+import org.graalvm.options.OptionKey;
 
 @Registration(id = EspressoLanguage.ID, //
                 name = EspressoLanguage.NAME, //
@@ -76,12 +78,13 @@ public final class EspressoLanguage extends TruffleLanguage<EspressoContext> {
 
     public static final String FILE_EXTENSION = ".class";
 
+    private final TruffleLogger logger = TruffleLogger.getLogger(ID);
     private final Utf8ConstantTable utf8Constants;
     private final Names names;
     private final Types types;
     private final Signatures signatures;
 
-    // Multiple caches are nececary depending of the Java version (8 or 11)
+    // Multiple caches are necessary depending of the Java version (8 or 11)
     private final EspressoLanguageCache cache8;
     private final EspressoLanguageCache cache11;
 
@@ -119,7 +122,7 @@ public final class EspressoLanguage extends TruffleLanguage<EspressoContext> {
 
     @Override
     protected void initializeContext(final EspressoContext context) throws Exception {
-        context.initializeContext();
+        context.initializeContext(context.getEnv().isPreInitialization());
     }
 
     @Override
@@ -148,6 +151,27 @@ public final class EspressoLanguage extends TruffleLanguage<EspressoContext> {
     @Override
     protected void disposeContext(final EspressoContext context) {
         context.disposeContext();
+    }
+
+    @Override
+    protected boolean patchContext(EspressoContext context, TruffleLanguage.Env newEnv) {
+        if (!optionsAllowPreInitializedContext(context, newEnv)) {
+            return false;
+        }
+        context.setEnv(newEnv);
+        context.setMainArguments(newEnv.getApplicationArguments());
+        if (!context.isInitialized()) {
+            context.initializeContext(false);
+        }
+        return true;
+    }
+
+    private boolean optionsAllowPreInitializedContext(EspressoContext context, TruffleLanguage.Env newEnv) {
+        // TODO check boot class path
+        // TODO check java version
+        // final String newVersionValue = newEnv.getOptions().get();
+        // return Objects.equals(context.languageVersion, newVersionValue);
+        return true;
     }
 
     @Override
@@ -212,12 +236,16 @@ public final class EspressoLanguage extends TruffleLanguage<EspressoContext> {
 
     @Override
     protected void initializeThread(EspressoContext context, Thread thread) {
-        context.createThread(thread);
+        if (context.isInitialized()) {
+            context.createThread(thread);
+        }
     }
 
     @Override
     protected void disposeThread(EspressoContext context, Thread thread) {
-        context.disposeThread(thread);
+        if (context.isInitialized()) {
+            context.disposeThread(thread);
+        }
     }
 
 }
