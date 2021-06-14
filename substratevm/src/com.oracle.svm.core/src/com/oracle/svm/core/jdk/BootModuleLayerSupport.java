@@ -35,7 +35,7 @@ public final class BootModuleLayerSupport {
     public BootModuleLayerSupport() {
     }
 
-    @SuppressWarnings("static-method")
+    @SuppressWarnings({"unused", "static-method"})
     public void setReachableModules(Set<Object> modules) {
     }
 
