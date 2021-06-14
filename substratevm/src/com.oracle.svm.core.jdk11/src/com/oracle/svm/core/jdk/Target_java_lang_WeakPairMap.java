@@ -24,30 +24,8 @@
  */
 package com.oracle.svm.core.jdk;
 
-import com.oracle.svm.core.annotate.Alias;
 import com.oracle.svm.core.annotate.TargetClass;
-import com.oracle.svm.core.annotate.TargetElement;
-
-import java.lang.ref.ReferenceQueue;
-import java.util.concurrent.ConcurrentHashMap;
 
 @TargetClass(className = "java.lang.WeakPairMap", onlyWith = JDK11OrLater.class)
 final class Target_java_lang_WeakPairMap<K1, K2, V> {
-
-    @Alias //
-    @TargetElement(name = "map")
-    ConcurrentHashMap<Target_java_lang_WeakPairMap_Pair<K1, K2>, V> map;
-
-    @Alias //
-    ReferenceQueue<Object> queue;
-
-    @TargetClass(className = "java.lang.WeakPairMap", innerClass = "Pair", onlyWith = JDK11OrLater.class)
-    interface Target_java_lang_WeakPairMap_Pair<K1, K2> {
-        @Alias
-        K1 first();
-
-        @Alias
-        K2 second();
-    }
-
 }

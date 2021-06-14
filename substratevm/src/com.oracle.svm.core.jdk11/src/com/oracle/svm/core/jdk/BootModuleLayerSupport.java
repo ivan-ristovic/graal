@@ -26,6 +26,8 @@ package com.oracle.svm.core.jdk;
 
 import com.oracle.svm.core.SubstrateUtil;
 import org.graalvm.nativeimage.ImageSingletons;
+import org.graalvm.nativeimage.Platform;
+import org.graalvm.nativeimage.Platforms;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,12 +46,14 @@ public final class BootModuleLayerSupport {
     private final Map<String, Module> nameToModule;
     private boolean isAnalysisComplete;
 
+    @Platforms(Platform.HOSTED_ONLY.class)
     public BootModuleLayerSupport() {
         bootLayer = ModuleLayer.boot();
         reachableModules = new HashSet<>();
         nameToModule = new HashMap<>();
     }
 
+    @Platforms(Platform.HOSTED_ONLY.class)
     public void setReachableModules(Set<Object> modules) {
         isAnalysisComplete = true;
         reachableModules.addAll(modules
@@ -67,5 +71,4 @@ public final class BootModuleLayerSupport {
         }
         return originalLayer;
     }
-
 }
