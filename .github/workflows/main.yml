@@ -86,7 +86,7 @@ jobs:
               PRIMARY: "compiler"
           - env:
               JDK: "labsjdk-ce-11"
-              GATE: "build,test"
+              GATE: "build,test,hellomodule"
               PRIMARY: "compiler"
           - env:
               JDK: "labsjdk-ce-11"
