@@ -78,7 +78,7 @@ jobs:
               PRIMARY: "substratevm"
           - env:
               JDK: "labsjdk-ce-11"
-              GATE: "build,debuginfotest"
+              GATE: "build,debuginfotesti,hellomodule"
               PRIMARY: "substratevm"
           - env:
               JDK: "labsjdk-ce-11"
@@ -86,7 +86,7 @@ jobs:
               PRIMARY: "compiler"
           - env:
               JDK: "labsjdk-ce-11"
-              GATE: "build,test,hellomodule"
+              GATE: "build,test"
               PRIMARY: "compiler"
           - env:
               JDK: "labsjdk-ce-11"
