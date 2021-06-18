@@ -28,10 +28,10 @@ import com.oracle.svm.core.annotate.Alias;
 import com.oracle.svm.core.annotate.RecomputeFieldValue;
 import com.oracle.svm.core.annotate.Substitute;
 import com.oracle.svm.core.annotate.TargetClass;
+import com.oracle.svm.core.jdk.resources.ResourceStorageEntry;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.List;
 
 @TargetClass(className = "java.lang.Module", onlyWith = JDK11OrLater.class)
 public final class Target_java_lang_Module {
@@ -39,8 +39,8 @@ public final class Target_java_lang_Module {
     @SuppressWarnings("static-method")
     @Substitute
     public InputStream getResourceAsStream(String name) {
-        List<byte[]> arr = Resources.get(name);
-        return arr == null ? null : new ByteArrayInputStream(arr.get(0));
+        ResourceStorageEntry res = Resources.get(name);
+        return res == null ? null : new ByteArrayInputStream(res.getData().get(0));
     }
 
 
