@@ -80,6 +80,7 @@ jobs:
               JDK: "labsjdk-ce-11"
               GATE: "build,debuginfotesti,hellomodule"
               PRIMARY: "substratevm"
+              USE_NATIVE_IMAGE_JAVA_PLATFORM_MODULE_SYSTEM: true
           - env:
               JDK: "labsjdk-ce-11"
               GATE: "style,fullbuild"
