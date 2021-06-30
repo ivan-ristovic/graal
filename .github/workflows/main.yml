@@ -78,7 +78,11 @@ jobs:
               PRIMARY: "substratevm"
           - env:
               JDK: "labsjdk-ce-11"
-              GATE: "build,debuginfotesti,hellomodule"
+              GATE: "build,debuginfotest"
+              PRIMARY: "substratevm"
+          - env:
+              JDK: "labsjdk-ce-11"
+              GATE: "hellomodule"
               PRIMARY: "substratevm"
               USE_NATIVE_IMAGE_JAVA_PLATFORM_MODULE_SYSTEM: true
           - env:
