@@ -43,11 +43,9 @@ public final class Target_java_lang_Module {
         return res == null ? null : new ByteArrayInputStream(res.getData().get(0));
     }
 
-
     @TargetClass(className = "java.lang.Module", innerClass = "ReflectionData", onlyWith = JDK11OrLater.class) //
     private static final class Target_java_lang_Module_ReflectionData {
         @Alias @RecomputeFieldValue(kind = RecomputeFieldValue.Kind.NewInstance, declClassName = "java.lang.WeakPairMap") //
         static Target_java_lang_WeakPairMap<Module, Class<?>, Boolean> uses;
     }
-
 }
