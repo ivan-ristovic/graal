@@ -153,11 +153,15 @@ import com.oracle.truffle.espresso.substitutions.VMCollector;
 @GenerateNativeEnv(target = VmImpl.class)
 public final class VM extends NativeEnv implements ContextAccess {
 
-    private final @Pointer TruffleObject disposeMokapotContext;
+    @CompilerDirectives.CompilationFinal //
+    private @Pointer TruffleObject disposeMokapotContext;
 
-    private final @Pointer TruffleObject getJavaVM;
-    private final @Pointer TruffleObject mokapotAttachThread;
-    private final @Pointer TruffleObject getPackageAt;
+    @CompilerDirectives.CompilationFinal //
+    private @Pointer TruffleObject getJavaVM;
+    @CompilerDirectives.CompilationFinal //
+    private @Pointer TruffleObject mokapotAttachThread;
+    @CompilerDirectives.CompilationFinal //
+    private @Pointer TruffleObject getPackageAt;
 
     private final long rtldDefaultValue;
 
@@ -168,7 +172,7 @@ public final class VM extends NativeEnv implements ContextAccess {
     private @Pointer TruffleObject mokapotEnvPtr;
 
     // libjava must be loaded after mokapot.
-    private final @Pointer TruffleObject javaLibrary;
+    private @Pointer TruffleObject javaLibrary;
 
     private static String stringify(List<Path> paths) {
         StringJoiner joiner = new StringJoiner(File.pathSeparator);
@@ -1158,6 +1162,7 @@ public final class VM extends NativeEnv implements ContextAccess {
 
     public void dispose() {
         assert !getUncached().isNull(mokapotEnvPtr) : "Mokapot already disposed";
+        super.dispose();
         try {
             if (management != null) {
                 assert getContext().EnableManagement;
@@ -1168,6 +1173,13 @@ public final class VM extends NativeEnv implements ContextAccess {
             }
             getUncached().execute(disposeMokapotContext, mokapotEnvPtr, RawPointer.nullInstance());
             this.mokapotEnvPtr = RawPointer.nullInstance();
+            this.javaLibrary = null;
+            this.disposeMokapotContext = null;
+            this.mokapotAttachThread = null;
+            this.getPackageAt = null;
+            this.getJavaVM = null;
+            this.handle2Lib.clear();
+            this.handle2Sym.clear();
         } catch (UnsupportedTypeException | ArityException | UnsupportedMessageException e) {
             throw EspressoError.shouldNotReachHere("Cannot dispose Espresso libjvm (mokapot).");
         }

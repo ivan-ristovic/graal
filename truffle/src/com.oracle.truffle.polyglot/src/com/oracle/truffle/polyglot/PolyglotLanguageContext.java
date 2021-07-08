@@ -708,6 +708,7 @@ final class PolyglotLanguageContext implements PolyglotImpl.VMObject {
                 return false;
             } catch (Throwable t) {
                 LOG.log(Level.FINE, "Exception during patching context of language: {0}", this.language.getId());
+                t.printStackTrace();
                 // The conversion to the host exception happens in the
                 // PolyglotEngineImpl.createContext
                 throw silenceException(RuntimeException.class, t);

@@ -66,7 +66,7 @@ public final class EspressoLanguageCache {
     public void updateEnv(final TruffleLanguage.Env env) {
         boolean isParserKlassCacheEnabledNew = env.getOptions().get(EspressoOptions.UseParserKlassCache);
         boolean isLinkedKlassCacheEnabledNew = env.getOptions().get(EspressoOptions.UseLinkedKlassCache);
-        if (isParserKlassCacheEnabled != isParserKlassCacheEnabledNew || isLinkedKlassCacheEnabled != isParserKlassCacheEnabledNew) {
+        if (isParserKlassCacheEnabled != isParserKlassCacheEnabledNew || isLinkedKlassCacheEnabled != isLinkedKlassCacheEnabledNew) {
             reset();
             isParserKlassCacheEnabled = isParserKlassCacheEnabledNew;
             isLinkedKlassCacheEnabled = isLinkedKlassCacheEnabledNew;

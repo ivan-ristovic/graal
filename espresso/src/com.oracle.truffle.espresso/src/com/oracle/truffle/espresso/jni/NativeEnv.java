@@ -125,6 +125,10 @@ public abstract class NativeEnv implements ContextAccess {
         return res;
     }
 
+    public void dispose() {
+        this.nativeClosures.clear();
+    }
+
     private Map<String, IntrinsicSubstitutor.Factory> buildMethodsMap() {
         Map<String, IntrinsicSubstitutor.Factory> map = new HashMap<>();
         for (IntrinsicSubstitutor.Factory method : getCollector()) {
@@ -158,6 +162,7 @@ public abstract class NativeEnv implements ContextAccess {
     }
 
     private TruffleObject getLookupCallbackClosure() {
+
         Callback callback = new Callback(LOOKUP_CALLBACK_ARGS_COUNT, new Callback.Function() {
             @Override
             public Object call(Object... args) {

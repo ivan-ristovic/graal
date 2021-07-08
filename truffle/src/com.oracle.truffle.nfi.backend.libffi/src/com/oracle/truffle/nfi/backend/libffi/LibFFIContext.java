@@ -41,6 +41,8 @@
 package com.oracle.truffle.nfi.backend.libffi;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import com.oracle.truffle.api.CallTarget;
@@ -54,10 +56,17 @@ import com.oracle.truffle.nfi.backend.spi.types.NativeSimpleType;
 
 class LibFFIContext {
 
+    private static List<LibFFIContext> instances = new LinkedList<>();
+    public static void clearInstances() {
+        instances.forEach(i -> i.nativePointerMap.clear());
+        instances.forEach(i -> i.attachThreadLogger = null);
+    }
+
+
     final LibFFILanguage language;
     Env env;
 
-    final TruffleLogger attachThreadLogger;
+    TruffleLogger attachThreadLogger;
 
     private long nativeContext;
     private final ThreadLocal<NativeEnv> nativeEnv = ThreadLocal.withInitial(new NativeEnvSupplier());
@@ -103,6 +112,8 @@ class LibFFIContext {
         this.language = language;
         this.env = env;
         this.attachThreadLogger = env.getLogger("attachCurrentThread");
+
+        instances.add(this);
     }
 
     void patchEnv(Env newEnv) {

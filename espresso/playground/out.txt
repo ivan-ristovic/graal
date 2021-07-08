@@ -1,0 +1,80 @@
+[To redirect Truffle log output to a file use one of the following options:
+* '--log.file=<path>' if the option is passed using a guest language launcher.
+* '-Dpolyglot.log.file=<path>' if the option is passed using the host Java launcher.
+* Configure logging using the polyglot embedding API.]
+[engine::PolyglotLanguageContext] FINE: Successfully patched context of language: internal/nfi-native
+[engine::PolyglotLanguageContext] FINE: Successfully patched context of language: nfi
+[jdwp] FINE: Espresso HotSwap Plugin support is disabled. HotSwap is only supported in debug mode.
+[java] FINE: Adding Polyglot API to the boot classpath: /home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/languages/java/lib/polyglot.jar
+[jdwp] FINE: Espresso HotSwap Plugin support is disabled. HotSwap is only supported in debug mode.
+[java] FINE: Adding Polyglot API to the boot classpath: /home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/languages/java/lib/polyglot.jar
+[java] FINE: Native backend: nfi-native
+[java::FINativeAccess] FINE: AbstractTruffleException while loading library though NFI (load(RTLD_LAZY) '/home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/amd64/truffle/libjvm.so') : /home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/amd64/truffle/libjvm.so: cannot open shared object file: No such file or directory
+[java::FINativeAccess] FINE: AbstractTruffleException while loading library though NFI (load(RTLD_LAZY) '/home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/amd64/libverify.so') : /home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/amd64/libverify.so: cannot open shared object file: No such file or directory
+[java::FINativeAccess] FINE: AbstractTruffleException while loading library though NFI (load(RTLD_LAZY) '/home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/amd64/libjava.so') : /home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/amd64/libjava.so: cannot open shared object file: No such file or directory
+[java::FINativeAccess] FINE: AbstractTruffleException while loading library though NFI (load(RTLD_LAZY) '/home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/amd64/libjimage.so') : /home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/amd64/libjimage.so: cannot open shared object file: No such file or directory
+[java::Substitutions] FINE: Runtime substitution shadowed by static one: java.lang.Object#hashCode()I
+[java::Substitutions] FINE: Runtime substitution shadowed by static one: java.lang.Object#clone()Ljava/lang/Object;
+[java::Substitutions] FINE: Runtime substitution shadowed by static one: java.lang.System#currentTimeMillis()J
+[java::Substitutions] FINE: Runtime substitution shadowed by static one: java.lang.System#nanoTime()J
+[java::Substitutions] FINE: Runtime substitution shadowed by static one: java.lang.System#arraycopy(Ljava/lang/Object;ILjava/lang/Object;II)V
+[java::EspressoThreadManager] FINE: createMainThread: [HOST:main, 1], [GUEST:main, 1]
+[java] FINE: Thread.start0: [HOST:Polyglot-java-0, 9], [GUEST:Reference Handler, 2]
+[java] FINE: Thread.start0: [HOST:Polyglot-java-1, 10], [GUEST:Finalizer, 3]
+[java::VM] FINE: JVM_LoadLibrary: '/home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/libnio.so'
+[java::VM] FINE: JVM_LoadLibrary: Successfully loaded '/home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/libnio.so' with handle 7fe8f425b0c0
+[java] FINE: Thread.start0: [HOST:Polyglot-java-3, 13], [GUEST:Common-Cleaner, 4]
+[java] FINE: VM booted in 566 ms
+[engine::PolyglotLanguageContext] FINE: Successfully patched context of language: java
+[java::EspressoThreadManager] FINE: createGuestThreadFromHost: [HOST:Polyglot-java-2, 11], [GUEST:Thread-0, 5]
+Espresso 64-Bit VM
+Hello world!
+[java::VM] FINE: DetachCurrentThread: main
+[java::EspressoThreadManager] FINE: unregisterThread([GUEST:main, 1])
+[java::EspressoThreadManager] FINE: createGuestThreadFromHost: [HOST:System-7, 14], [GUEST:Thread-1, 6]
+[java::VM] FINE: DetachCurrentThread: Thread-1
+[java::EspressoThreadManager] FINE: unregisterThread([GUEST:Thread-1, 6])
+[java] FINE: Waiting for non-daemon threads to finish or exit
+[java::EspressoThreadManager] FINE: unregisterThread([GUEST:Thread-0, 5])
+[java] FINE: Time spent in Espresso: 742 ms
+[java] FINE: doExit(0) from <unknown>
+[To redirect Truffle log output to a file use one of the following options:
+* '--log.file=<path>' if the option is passed using a guest language launcher.
+* '-Dpolyglot.log.file=<path>' if the option is passed using the host Java launcher.
+* Configure logging using the polyglot embedding API.]
+[engine::PolyglotLanguageContext] FINE: Successfully patched context of language: internal/nfi-native
+[engine::PolyglotLanguageContext] FINE: Successfully patched context of language: nfi
+[jdwp] FINE: Espresso HotSwap Plugin support is disabled. HotSwap is only supported in debug mode.
+[java] FINE: Adding Polyglot API to the boot classpath: /home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/languages/java/lib/polyglot.jar
+[jdwp] FINE: Espresso HotSwap Plugin support is disabled. HotSwap is only supported in debug mode.
+[java] FINE: Adding Polyglot API to the boot classpath: /home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/languages/java/lib/polyglot.jar
+[java] FINE: Native backend: nfi-native
+[java::FINativeAccess] FINE: AbstractTruffleException while loading library though NFI (load(RTLD_LAZY) '/home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/amd64/truffle/libjvm.so') : /home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/amd64/truffle/libjvm.so: cannot open shared object file: No such file or directory
+[java::FINativeAccess] FINE: AbstractTruffleException while loading library though NFI (load(RTLD_LAZY) '/home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/amd64/libverify.so') : /home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/amd64/libverify.so: cannot open shared object file: No such file or directory
+[java::FINativeAccess] FINE: AbstractTruffleException while loading library though NFI (load(RTLD_LAZY) '/home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/amd64/libjava.so') : /home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/amd64/libjava.so: cannot open shared object file: No such file or directory
+[java::FINativeAccess] FINE: AbstractTruffleException while loading library though NFI (load(RTLD_LAZY) '/home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/amd64/libjimage.so') : /home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/amd64/libjimage.so: cannot open shared object file: No such file or directory
+[java::Substitutions] FINE: Runtime substitution shadowed by static one: java.lang.Object#hashCode()I
+[java::Substitutions] FINE: Runtime substitution shadowed by static one: java.lang.Object#clone()Ljava/lang/Object;
+[java::Substitutions] FINE: Runtime substitution shadowed by static one: java.lang.System#currentTimeMillis()J
+[java::Substitutions] FINE: Runtime substitution shadowed by static one: java.lang.System#nanoTime()J
+[java::Substitutions] FINE: Runtime substitution shadowed by static one: java.lang.System#arraycopy(Ljava/lang/Object;ILjava/lang/Object;II)V
+[java::EspressoThreadManager] FINE: createMainThread: [HOST:main, 1], [GUEST:main, 1]
+[java] FINE: Thread.start0: [HOST:Polyglot-java-0, 9], [GUEST:Reference Handler, 2]
+[java] FINE: Thread.start0: [HOST:Polyglot-java-1, 10], [GUEST:Finalizer, 3]
+[java::VM] FINE: JVM_LoadLibrary: '/home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/libnio.so'
+[java::VM] FINE: JVM_LoadLibrary: Successfully loaded '/home/ivan/graal/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_NATIVE_CE_JAVA11/graalvm-espresso-native-ce-java11-21.3.0-dev/lib/libnio.so' with handle 7f2e6425b0c0
+[java] FINE: Thread.start0: [HOST:Polyglot-java-3, 13], [GUEST:Common-Cleaner, 4]
+[java] FINE: VM booted in 737 ms
+[engine::PolyglotLanguageContext] FINE: Successfully patched context of language: java
+[java::EspressoThreadManager] FINE: createGuestThreadFromHost: [HOST:Polyglot-java-2, 11], [GUEST:Thread-0, 5]
+Espresso 64-Bit VM
+Hello world!
+[java::VM] FINE: DetachCurrentThread: main
+[java::EspressoThreadManager] FINE: unregisterThread([GUEST:main, 1])
+[java::EspressoThreadManager] FINE: createGuestThreadFromHost: [HOST:System-7, 14], [GUEST:Thread-1, 6]
+[java::VM] FINE: DetachCurrentThread: Thread-1
+[java::EspressoThreadManager] FINE: unregisterThread([GUEST:Thread-1, 6])
+[java] FINE: Waiting for non-daemon threads to finish or exit
+[java::EspressoThreadManager] FINE: unregisterThread([GUEST:Thread-0, 5])
+[java] FINE: Time spent in Espresso: 857 ms
+[java] FINE: doExit(0) from <unknown>

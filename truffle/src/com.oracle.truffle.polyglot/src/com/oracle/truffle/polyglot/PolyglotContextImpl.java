@@ -2658,10 +2658,10 @@ final class PolyglotContextImpl implements com.oracle.truffle.polyglot.PolyglotI
                         System.in,
                         false,
                         PolyglotAccess.ALL, // TODO change this to NONE with GR-14657
+                        true,
+                        true,
                         false,
-                        false,
-                        false,
-                        false,
+                        true,
                         null,
                         Collections.emptyMap(),
                         allowedLanguages,

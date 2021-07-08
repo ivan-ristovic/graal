@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.ReferenceQueue;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,12 +46,10 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import com.oracle.truffle.espresso.FinalizationFeature;
+import com.oracle.truffle.espresso.jni.NativeEnv;
 import com.oracle.truffle.espresso.redefinition.plugins.api.InternalRedefinitionPlugin;
 import com.oracle.truffle.espresso.impl.EspressoLanguageCache;
-import org.graalvm.nativeimage.ImageInfo;
 import com.oracle.truffle.espresso.impl.ClassRegistries;
-import com.oracle.truffle.espresso.impl.EspressoLanguageCache;
 import com.oracle.truffle.espresso.impl.Method;
 import com.oracle.truffle.espresso.impl.ParserKlassCacheListSupport;
 import com.oracle.truffle.espresso.impl.Klass;
@@ -90,7 +89,6 @@ import com.oracle.truffle.espresso.meta.Meta;
 import com.oracle.truffle.espresso.perf.DebugCloseable;
 import com.oracle.truffle.espresso.perf.DebugTimer;
 import com.oracle.truffle.espresso.perf.TimerCollection;
-import com.oracle.truffle.espresso.redefinition.plugins.api.InternalRedefinitionPlugin;
 import com.oracle.truffle.espresso.substitutions.Substitutions;
 import com.oracle.truffle.espresso.substitutions.Target_java_lang_Thread;
 import com.oracle.truffle.espresso.vm.InterpreterToVM;
@@ -425,13 +423,13 @@ public final class EspressoContext {
         startupClockNanos = System.nanoTime();
         eventListener = new EmptyListener();
 
-        if (!ImageInfo.inImageRuntimeCode()) {
-            // Setup finalization support in the host VM.
-            FinalizationFeature.ensureInitialized();
-        }
+        FinalizationSupport.ensureInitialized();
 
+        this.bootClasspath = null;
         if (isPreinitialization) {
-            preInitialize();
+            //preInitialize();
+            spawnVM();
+            afterPreInitialization();
         } else {
             spawnVM();
             this.initialized = true;
@@ -472,6 +470,13 @@ public final class EspressoContext {
         return nativeAccess;
     }
 
+    public NativeAccess getOrCreateNativeAccess() {
+        if (nativeAccess == null) {
+            this.nativeAccess = spawnNativeAccess();
+        }
+        return nativeAccess;
+    }
+
     @SuppressWarnings("try")
     public void preInitialize() {
         long initStartTimeNanos = System.nanoTime();
@@ -480,6 +485,13 @@ public final class EspressoContext {
         if (getJavaVersion().modulesEnabled()) {
             registries.initJavaBaseModule();
             registries.getBootClassRegistry().initUnnamedModule(StaticObject.NULL);
+        }
+
+        // Spawn JNI first, then the VM.
+        try (DebugCloseable vmInit = VM_INIT.scope(timers)) {
+            this.nativeAccess = spawnNativeAccess();
+            this.vm = VM.create(getJNI()); // Mokapot is loaded
+            vm.attachThread(Thread.currentThread());
         }
 
         try (DebugCloseable metaInit = META_INIT.scope(timers)) {
@@ -503,13 +515,35 @@ public final class EspressoContext {
             }
         }
 
-        getCache().seal();
-
         initDoneTimeNanos = System.nanoTime();
         long elapsedNanos = initDoneTimeNanos - initStartTimeNanos;
         getLogger().log(Level.FINE, "Context pre-initialized in {0} ms", TimeUnit.NANOSECONDS.toMillis(elapsedNanos));
+    }
+
+    private void afterPreInitialization() {
+        getCache().seal();
 
         this.bootClasspath.closeEntries();
+        getJNI().dispose();
+        this.vm.dispose();
+        this.nativeAccess = null;
+        this.jniEnv = null;
+        this.vm = null;
+        this.jimageLibrary = null;
+
+//        this.threadManager = null;
+//        this.outOfMemory = null;
+//        this.stackOverflow = null;
+//        this.shutdownManager = null;
+
+        try {
+            Class<?> klass = Class.forName("com.oracle.truffle.nfi.backend.libffi.LibFFIContext");
+            java.lang.reflect.Method m = klass.getDeclaredMethod("clearInstances");
+            m.setAccessible(true);
+            m.invoke(null);
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 
     @SuppressWarnings("try")

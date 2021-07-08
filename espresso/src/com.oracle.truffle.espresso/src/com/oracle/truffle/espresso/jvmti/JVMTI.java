@@ -49,10 +49,14 @@ public final class JVMTI {
     private static final DebugTimer STRUCTS_TIMER = DebugTimer.create("native struct creation");
 
     private final EspressoContext context;
+    @CompilationFinal //
     private @Pointer TruffleObject initializeJvmtiHandlerContext;
+    @CompilationFinal //
     private @Pointer TruffleObject lookupMemberOffset;
-    private final @Pointer TruffleObject initializeJvmtiContext;
-    private final @Pointer TruffleObject disposeJvmtiContext;
+    @CompilationFinal //
+    private @Pointer TruffleObject initializeJvmtiContext;
+    @CompilationFinal //
+    private @Pointer TruffleObject disposeJvmtiContext;
 
     @CompilationFinal //
     private volatile Structs structs;
@@ -137,6 +141,10 @@ public final class JVMTI {
             jvmtiEnv.dispose(disposeJvmtiContext);
         }
         activeEnvironments.clear();
+        this.initializeJvmtiContext = null;
+        this.disposeJvmtiContext = null;
+        this.initializeJvmtiHandlerContext = null;
+        this.lookupMemberOffset = null;
     }
 
     @TruffleBoundary
