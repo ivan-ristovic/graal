@@ -43,6 +43,26 @@ public final class Target_java_lang_Module {
         return res == null ? null : new ByteArrayInputStream(res.getData().get(0));
     }
 
+    @Substitute
+    private static void defineModule0(Module module, boolean isOpen, String version, String location, String[] pns) {
+    }
+
+    @Substitute
+    private static void addReads0(Module from, Module to) {
+    }
+
+    @Substitute
+    private static void addExports0(Module from, String pn, Module to) {
+    }
+
+    @Substitute
+    private static void addExportsToAll0(Module from, String pn) {
+    }
+
+    @Substitute
+    private static void addExportsToAllUnnamed0(Module from, String pn) {
+    }
+
     @TargetClass(className = "java.lang.Module", innerClass = "ReflectionData", onlyWith = JDK11OrLater.class) //
     private static final class Target_java_lang_Module_ReflectionData {
         @Alias @RecomputeFieldValue(kind = RecomputeFieldValue.Kind.NewInstance, declClassName = "java.lang.WeakPairMap") //

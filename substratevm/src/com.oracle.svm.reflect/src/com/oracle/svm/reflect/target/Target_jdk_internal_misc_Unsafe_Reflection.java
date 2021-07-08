@@ -76,6 +76,7 @@ public final class Target_jdk_internal_misc_Unsafe_Reflection {
             return objectFieldOffset(cast);
         } catch (NoSuchFieldException nse) {
             throw new InternalError();
+            // TODO
         }
     }
 }

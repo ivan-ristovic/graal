@@ -246,12 +246,12 @@ public final class Target_java_lang_ClassLoader {
     @TargetElement(onlyWith = JDK11OrLater.class)//
     ConcurrentHashMap<?, ?> classLoaderValueMap;
 
-    @Substitute //
-    @TargetElement(onlyWith = JDK11OrLater.class) //
-    @SuppressWarnings({"unused"})
-    private boolean trySetObjectField(String name, Object obj) {
-        throw VMError.unsupportedFeature("JDK11OrLater: Target_java_lang_ClassLoader.trySetObjectField(String name, Object obj)");
-    }
+//    @Substitute //
+//    @TargetElement(onlyWith = JDK11OrLater.class) //
+//    @SuppressWarnings({"unused"})
+//    private boolean trySetObjectField(String name, Object obj) {
+//        throw VMError.unsupportedFeature("JDK11OrLater: Target_java_lang_ClassLoader.trySetObjectField(String name, Object obj)");
+//    }
 
     @Substitute //
     @SuppressWarnings({"unused"})
