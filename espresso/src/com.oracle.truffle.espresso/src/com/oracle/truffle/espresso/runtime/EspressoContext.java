@@ -45,12 +45,10 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import com.oracle.truffle.espresso.FinalizationFeature;
+import com.oracle.truffle.espresso.FinalizationSupport;
 import com.oracle.truffle.espresso.redefinition.plugins.api.InternalRedefinitionPlugin;
 import com.oracle.truffle.espresso.impl.EspressoLanguageCache;
-import org.graalvm.nativeimage.ImageInfo;
 import com.oracle.truffle.espresso.impl.ClassRegistries;
-import com.oracle.truffle.espresso.impl.EspressoLanguageCache;
 import com.oracle.truffle.espresso.impl.Method;
 import com.oracle.truffle.espresso.impl.ParserKlassCacheListSupport;
 import com.oracle.truffle.espresso.impl.Klass;
@@ -423,13 +421,13 @@ public final class EspressoContext {
         startupClockNanos = System.nanoTime();
         eventListener = new EmptyListener();
 
-        if (!ImageInfo.inImageRuntimeCode()) {
-            // Setup finalization support in the host VM.
-            FinalizationFeature.ensureInitialized();
-        }
+        FinalizationSupport.ensureInitialized();
 
+        this.bootClasspath = null;
         if (isPreinitialization) {
             preInitialize();
+            // spawnVM();
+            afterPreinitialization();
         } else {
             spawnVM();
             this.initialized = true;
@@ -480,6 +478,13 @@ public final class EspressoContext {
             registries.getBootClassRegistry().initUnnamedModule(StaticObject.NULL);
         }
 
+        // Spawn JNI first, then the VM.
+        try (DebugCloseable vmInit = VM_INIT.scope(timers)) {
+            this.nativeAccess = spawnNativeAccess();
+            this.vm = VM.create(getJNI()); // Mokapot is loaded
+            vm.attachThread(Thread.currentThread());
+        }
+
         try (DebugCloseable metaInit = META_INIT.scope(timers)) {
             this.meta = new Meta(this);
         }
@@ -501,13 +506,34 @@ public final class EspressoContext {
             }
         }
 
-        getCache().seal();
-
         initDoneTimeNanos = System.nanoTime();
         long elapsedNanos = initDoneTimeNanos - initStartTimeNanos;
         getLogger().log(Level.FINE, "Context pre-initialized in {0} ms", TimeUnit.NANOSECONDS.toMillis(elapsedNanos));
+    }
 
+    private void afterPreinitialization() {
+        getCache().seal();
         this.bootClasspath.closeEntries();
+
+        getJNI().dispose();
+        this.vm.dispose();
+        this.nativeAccess = null;
+        this.jniEnv = null;
+        this.jimageLibrary = null;
+
+//        this.threadManager = null;
+//        this.outOfMemory = null;
+//        this.stackOverflow = null;
+//        this.shutdownManager = null;
+
+        try {
+            Class<?> klass = Class.forName("com.oracle.truffle.nfi.backend.libffi.LibFFIContext");
+            java.lang.reflect.Method m = klass.getDeclaredMethod("clearInstances");
+            m.setAccessible(true);
+            m.invoke(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @SuppressWarnings("try")

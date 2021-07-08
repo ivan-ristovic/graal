@@ -142,8 +142,10 @@ public final class Management extends NativeEnv {
     @CompilationFinal //
     private int managementVersion;
 
-    private final @Pointer TruffleObject initializeManagementContext;
-    private final @Pointer TruffleObject disposeManagementContext;
+    @CompilationFinal //
+    private @Pointer TruffleObject initializeManagementContext;
+    @CompilationFinal //
+    private @Pointer TruffleObject disposeManagementContext;
 
     public Management(EspressoContext context, TruffleObject mokapotLibrary) {
         assert context.EnableManagement;
@@ -195,6 +197,7 @@ public final class Management extends NativeEnv {
     }
 
     public void dispose() {
+        super.dispose();
         if (managementPtr != null) {
             try {
                 getUncached().execute(disposeManagementContext, managementPtr, managementVersion, RawPointer.nullInstance());
@@ -204,6 +207,8 @@ public final class Management extends NativeEnv {
                 throw EspressoError.shouldNotReachHere("Cannot dispose Espresso management (mokapot).");
             }
         }
+        this.initializeManagementContext = null;
+        this.disposeManagementContext = null;
     }
 
     @Override

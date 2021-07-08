@@ -157,7 +157,12 @@ public final class EspressoLanguage extends TruffleLanguage<EspressoContext> imp
 
     @Override
     protected void initializeContext(final EspressoContext context) throws Exception {
-        context.initializeContext(context.getEnv().isPreInitialization());
+        boolean isPreinitialization = context.getEnv().isPreInitialization();
+        context.initializeContext(isPreinitialization);
+        if (isPreinitialization) {
+            this.cl = null;
+            staticCLC.setClassLoader(null);
+        }
     }
 
     @Override
