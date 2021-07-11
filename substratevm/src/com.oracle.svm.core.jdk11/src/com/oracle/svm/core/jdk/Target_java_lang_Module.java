@@ -32,7 +32,9 @@ import com.oracle.svm.core.jdk.resources.ResourceStorageEntry;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Objects;
 
+@SuppressWarnings("unused")
 @TargetClass(className = "java.lang.Module", onlyWith = JDK11OrLater.class)
 public final class Target_java_lang_Module {
 
@@ -45,22 +47,77 @@ public final class Target_java_lang_Module {
 
     @Substitute
     private static void defineModule0(Module module, boolean isOpen, String version, String location, String[] pns) {
+        if (Objects.isNull(module)) {
+            throw new NullPointerException("Null module object");
+        }
+
+        if (Objects.isNull(module.getName())) {
+            throw new IllegalArgumentException("Module name cannot be null");
+        }
+
+        if (module.getName().equals("java.base")) {
+            if (isOpen) {
+                throw new AssertionError("java.base module cannot be open");
+            }
+            // TODO define java.base module
+            return;
+        }
+
+        // TODO verify package names
+
+        // TODO bookkeeping
     }
 
     @Substitute
     private static void addReads0(Module from, Module to) {
+        if (Objects.isNull(from)) {
+            throw new NullPointerException("from_module is null");
+        }
+
+        // TODO bookkeeping
     }
 
     @Substitute
     private static void addExports0(Module from, String pn, Module to) {
+        if (Objects.isNull(pn)) {
+            throw new NullPointerException("package is null");
+        }
+
+        if (Objects.isNull(to)) {
+            throw new NullPointerException("to_module is null");
+        }
+
+        if (Objects.isNull(from)) {
+            throw new NullPointerException("from_module is null");
+        }
+
+        // TODO bookkeeping
     }
 
     @Substitute
     private static void addExportsToAll0(Module from, String pn) {
+        if (Objects.isNull(pn)) {
+            throw new NullPointerException("package is null");
+        }
+
+        if (Objects.isNull(from)) {
+            throw new NullPointerException("from_module is null");
+        }
+
+        // TODO bookkeeping
     }
 
     @Substitute
     private static void addExportsToAllUnnamed0(Module from, String pn) {
+        if (Objects.isNull(pn)) {
+            throw new NullPointerException("package is null");
+        }
+
+        if (Objects.isNull(from)) {
+            throw new NullPointerException("module is null");
+        }
+
+        // TODO bookkeeping
     }
 
     @TargetClass(className = "java.lang.Module", innerClass = "ReflectionData", onlyWith = JDK11OrLater.class) //
