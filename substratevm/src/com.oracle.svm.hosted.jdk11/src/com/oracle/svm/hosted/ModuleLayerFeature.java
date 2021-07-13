@@ -36,7 +36,10 @@ import org.graalvm.nativeimage.Platforms;
 import org.graalvm.nativeimage.hosted.Feature;
 
 import java.lang.module.Configuration;
+import java.lang.module.FindException;
+import java.lang.module.ModuleDescriptor;
 import java.lang.module.ModuleFinder;
+import java.lang.module.ResolutionException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -47,9 +50,15 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 @AutomaticFeature
 @Platforms(Platform.HOSTED_ONLY.class)
 public final class ModuleLayerFeature implements Feature {
+
+    private Field moduleNameToModuleField;
+    private Field configurationParentsField;
+    private Constructor<ModuleLayer> moduleLayerConstructor;
+
 
     @Override
     public boolean isInConfiguration(IsInConfigurationAccess access) {
@@ -59,57 +68,53 @@ public final class ModuleLayerFeature implements Feature {
     @Override
     public void afterRegistration(AfterRegistrationAccess access) {
         ImageSingletons.add(BootModuleLayerSupport.class, new BootModuleLayerSupport());
+        moduleNameToModuleField = ReflectionUtil.lookupField(ModuleLayer.class, "nameToModule");
+        configurationParentsField = ReflectionUtil.lookupField(Configuration.class, "parents");
+        moduleLayerConstructor = ReflectionUtil.lookupConstructor(ModuleLayer.class, Configuration.class, List.class, Function.class);
     }
 
     @Override
-    public void afterAnalysis(AfterAnalysisAccess access) {
-        FeatureImpl.AfterAnalysisAccessImpl accessImpl = (FeatureImpl.AfterAnalysisAccessImpl) access;
+    public void duringAnalysis(DuringAnalysisAccess access) {
+        FeatureImpl.DuringAnalysisAccessImpl accessImpl = (FeatureImpl.DuringAnalysisAccessImpl) access;
         AnalysisUniverse universe = accessImpl.getUniverse();
 
-        Set<Module> reachableModules = universe.getTypes()
+        Map<String, Module> reachableModules = universe.getTypes()
                 .stream()
                 .filter(t -> t.isReachable() && !t.isArray())
                 .map(t -> t.getJavaClass().getModule())
-                .filter(Module::isNamed)
-                .filter(m -> !m.getName().startsWith("jdk.proxy"))
-                .collect(Collectors.toSet());
+                .filter(m -> m.isNamed() && !m.getDescriptor().modifiers().contains(ModuleDescriptor.Modifier.SYNTHETIC))
+                .collect(Collectors.toMap(Module::getName, m -> m, (m1, m2) -> m1));
 
-        ModuleLayer runtimeBootLayer = synthesizeRuntimeBootLayer(accessImpl.imageClassLoader.modulepath(), reachableModules);
+        ModuleLayer runtimeBootLayer = synthesizeRuntimeBootLayer(accessImpl.imageClassLoader, reachableModules);
         BootModuleLayerSupport.instance().setBootLayer(runtimeBootLayer);
     }
 
-    private ModuleLayer synthesizeRuntimeBootLayer(List<Path> mp, Set<Module> reachableModules) {
-        Configuration cf = synthesizeRuntimeBootLayerConfiguration(mp, reachableModules);
+    private ModuleLayer synthesizeRuntimeBootLayer(ImageClassLoader cl, Map<String, Module> reachableModules) {
+        Configuration cf = synthesizeRuntimeBootLayerConfiguration(cl.modulepath(), reachableModules);
         try {
-            Constructor<ModuleLayer> ctor = ReflectionUtil.lookupConstructor(ModuleLayer.class, Configuration.class, List.class, Function.class);
-            ctor.setAccessible(true);
-            ModuleLayer runtimeBootLayer = ctor.newInstance(cf, List.of(), null);
+            ModuleLayer runtimeBootLayer = moduleLayerConstructor.newInstance(cf, List.of(), null);
             patchRuntimeBootLayer(runtimeBootLayer, reachableModules);
             return runtimeBootLayer;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
-            throw VMError.shouldNotReachHere("Failed to instantiate the runtime boot module layer.", ex);
+            throw VMError.shouldNotReachHere("Failed to synthesize the runtime boot module layer.", ex);
         }
     }
 
-    private Configuration synthesizeRuntimeBootLayerConfiguration(List<Path> mp, Set<Module> reachableModules) {
+    private Configuration synthesizeRuntimeBootLayerConfiguration(List<Path> mp, Map<String, Module> reachableModules) {
         ModuleFinder finder = ModuleFinder.of(mp.toArray(Path[]::new));
-        Set<String> roots = reachableModules.stream().map(Module::getName).collect(Collectors.toSet());
-        List<Configuration> parents = List.of(ModuleLayer.boot().configuration());
-        return Configuration.resolve(finder, parents, finder, roots);
+        Set<String> roots = reachableModules.keySet();
+        try {
+            Configuration cf = ModuleLayer.boot().configuration().resolve(finder, finder, roots);
+            configurationParentsField.set(cf, List.of(Configuration.empty()));
+            return cf;
+        } catch (IllegalAccessException | FindException | ResolutionException | SecurityException ex) {
+            throw VMError.shouldNotReachHere("Failed to synthesize the runtime boot module layer configuration.", ex);
+        }
     }
 
-    private void patchRuntimeBootLayer(ModuleLayer runtimeBootLayer, Set<Module> reachableModules) {
-        Map<String, Module> nameToModule = reachableModules
-                .stream()
-                .collect(Collectors.toMap(Module::getName, m -> m));
-
-        Field nameToModuleField = ReflectionUtil.lookupField(ModuleLayer.class, "nameToModule");
-        Field modulesField = ReflectionUtil.lookupField(ModuleLayer.class, "modules");
+    private void patchRuntimeBootLayer(ModuleLayer runtimeBootLayer, Map<String, Module> reachableModules) {
         try {
-            nameToModuleField.setAccessible(true);
-            modulesField.setAccessible(true);
-            nameToModuleField.set(runtimeBootLayer, nameToModule);
-            modulesField.set(runtimeBootLayer, reachableModules);
+            moduleNameToModuleField.set(runtimeBootLayer, reachableModules);
         } catch (IllegalAccessException ex) {
             throw VMError.shouldNotReachHere("Failed to patch the runtime boot module layer.", ex);
         }
