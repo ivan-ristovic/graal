@@ -34,6 +34,7 @@ import org.graalvm.nativeimage.ImageSingletons;
 import org.graalvm.nativeimage.Platform;
 import org.graalvm.nativeimage.Platforms;
 import org.graalvm.nativeimage.hosted.Feature;
+import org.graalvm.nativeimage.hosted.RuntimeReflection;
 
 import java.lang.module.Configuration;
 import java.lang.module.FindException;
@@ -50,15 +51,44 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("unused")
+/**
+ * This feature:
+ * <ul>
+ *      <li> synthesizes the runtime boot module layer </li>
+ *      <li> ensures that fields/methods from the {@link ClassLoader} class are reachable in order to
+ *      make native methods of the {@link Module} class work </li>
+ * </ul>
+ * <p>
+ * This feature synthesizes the runtime boot module layer by using type reachability information.
+ * If a type is reachable, its module is also reachable and therefore should be included in the
+ * runtime boot module layer.
+ * </p>
+ * <p>
+ * The configuration for the runtime boot module layer is resolved using the module reachability
+ * data provided to us by the analysis as resolve roots.
+ * </p>
+ * <p>
+ * We are purposefully avoiding public API for module layer creation, such as
+ * {@link ModuleLayer#defineModulesWithOneLoader(Configuration, ClassLoader)}, because as a side
+ * effect this will create a new class loader. Instead, we use a private constructor to construct
+ * the {@link ModuleLayer} instance, which we then patch using the module reachability data
+ * provided to us by the analysis.
+ * </p>
+ * <p>
+ * Because the result of this feature is dependant on the analysis results, and because this feature
+ * will add reachable object(s) as it's result, it is necessary to perform the logic during the
+ * analysis, for lack of a better option (even though only the last analysis cycle is sufficient,
+ * but that cannot be known in advance).
+ * </p>
+ */
 @AutomaticFeature
 @Platforms(Platform.HOSTED_ONLY.class)
 public final class ModuleLayerFeature implements Feature {
 
     private Field moduleNameToModuleField;
+    private Field moduleParentsField;
     private Field configurationParentsField;
     private Constructor<ModuleLayer> moduleLayerConstructor;
-
 
     @Override
     public boolean isInConfiguration(IsInConfigurationAccess access) {
@@ -69,8 +99,18 @@ public final class ModuleLayerFeature implements Feature {
     public void afterRegistration(AfterRegistrationAccess access) {
         ImageSingletons.add(BootModuleLayerSupport.class, new BootModuleLayerSupport());
         moduleNameToModuleField = ReflectionUtil.lookupField(ModuleLayer.class, "nameToModule");
+        moduleParentsField = ReflectionUtil.lookupField(ModuleLayer.class, "parents");
         configurationParentsField = ReflectionUtil.lookupField(Configuration.class, "parents");
         moduleLayerConstructor = ReflectionUtil.lookupConstructor(ModuleLayer.class, Configuration.class, List.class, Function.class);
+    }
+
+    @Override
+    public void beforeAnalysis(BeforeAnalysisAccess access) {
+        access.registerReachabilityHandler(
+                a -> a.registerAsUnsafeAccessed(ReflectionUtil.lookupField(ClassLoader.class, "classLoaderValueMap")),
+                ReflectionUtil.lookupMethod(ClassLoader.class, "trySetObjectField", String.class, Object.class)
+        );
+        RuntimeReflection.register(ReflectionUtil.lookupField(ClassLoader.class, "classLoaderValueMap"));
     }
 
     @Override
@@ -115,6 +155,7 @@ public final class ModuleLayerFeature implements Feature {
     private void patchRuntimeBootLayer(ModuleLayer runtimeBootLayer, Map<String, Module> reachableModules) {
         try {
             moduleNameToModuleField.set(runtimeBootLayer, reachableModules);
+            moduleParentsField.set(runtimeBootLayer, List.of(ModuleLayer.empty()));
         } catch (IllegalAccessException ex) {
             throw VMError.shouldNotReachHere("Failed to patch the runtime boot module layer.", ex);
         }
